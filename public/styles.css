@@ -308,8 +308,8 @@ th {
   background: var(--ink);
 }
 .cars-section {
-  background: #11161d;
-  color: white;
+  background: var(--cream);
+  color: var(--ink);
   padding: 85px max(28px, calc((100vw - 1064px) / 2));
 }
 .cars-section h2 {
@@ -322,7 +322,7 @@ th {
   gap: 20px;
 }
 .car-grid article {
-  border-top: 1px solid #4f565e;
+  border-top: 1px solid #ff5b2e;
   padding-top: 18px;
   text-align: center;
   display: flex;
@@ -335,7 +335,7 @@ th {
 }
 .car-grid p {
   margin: 0;
-  color: #bac1c8;
+  color: var(--muted);
   font-size: 14px;
 }
 .car-logo {
@@ -345,7 +345,6 @@ th {
   max-height: 46px !important;
   display: block;
   object-fit: contain;
-  border: 1px solid #77808a;
   background: white;
   align-self: center;
 }
