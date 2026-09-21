@@ -22,6 +22,7 @@ async function loadEvent() {
   document.querySelector('#destinationMapsLink').href = event.destinationMapsUrl;
   document.querySelector('#modalTitle').textContent = event.title;
   document.querySelector('#modalDescription').textContent = event.description;
+  if (event.isFull) setRsvpUnavailable();
   if (event.showcaseItems.length) {
     document.querySelector('#carsSection').hidden = false;
     document.querySelector('#carGrid').innerHTML = event.showcaseItems.map((item) => `<article><img class="car-logo" src="${escapeAttribute(item.image_src)}" alt="${escapeAttribute(item.title)} logo"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`).join('');
@@ -29,6 +30,13 @@ async function loadEvent() {
 }
 function escapeHtml(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
 function escapeAttribute(value) { return escapeHtml(value).replace(/`/g, '&#96;'); }
+function setRsvpUnavailable() {
+  for (const button of document.querySelectorAll('#openRsvp, #openRsvpFinal')) {
+    button.textContent = 'No more spots are available';
+    button.disabled = true;
+    button.classList.add('unavailable');
+  }
+}
 
 document.querySelector('#openRsvp').addEventListener('click', () => dialog.showModal());
 document.querySelector('#openRsvpFinal').addEventListener('click', () => dialog.showModal());
@@ -40,6 +48,7 @@ form.addEventListener('submit', async (event) => {
   const response = await fetch('/api/rsvps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attending: data.get('attending') === 'yes', fullName: data.get('fullName'), carMakeModel: data.get('carMakeModel') }) });
   const result = await response.json();
   message.textContent = result.message || result.error;
+  if (response.status === 409) setRsvpUnavailable();
   if (response.ok) { form.reset(); setTimeout(() => dialog.close(), 1300); }
 });
 loadEvent().catch(() => { document.querySelector('#eventTitle').textContent = 'Event details are unavailable.'; });

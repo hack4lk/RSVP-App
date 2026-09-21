@@ -8,6 +8,8 @@ Copy `.env.example` to `.env` and change its event fields. The hero image, locat
 
 Set `START_NAME`, `START_ADDRESS`, `START_MAPS_URL`, `DESTINATION_NAME`, `DESTINATION_ADDRESS`, and `DESTINATION_MAPS_URL` to show the cruise route on the landing page.
 
+Set `MAX_ENTRIES` to the maximum number of guests who select “Yes” on the RSVP form. It defaults to `10`; when reached, the public RSVP buttons close and the server rejects any further attending RSVPs.
+
 `ADMIN_USERNAME` and `ADMIN_PASSWORD` protect `/admin` using browser basic authentication. Set a long, unique production password.
 
 From `/admin`, add car-logo rows for the public page. Each row has an image (upload a PNG, JPG, GIF, or WebP under 3.5 MB, or provide an image URL), title, and description. The rows are stored in PostgreSQL and render in the public car-community list.

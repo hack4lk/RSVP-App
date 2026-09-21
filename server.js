@@ -6,6 +6,8 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 const useDatabaseSsl = process.env.DB_SSL === 'true' || (process.env.DB_SSL !== 'false' && Boolean(process.env.RAILWAY_DEPLOYMENT_ID));
+const parsedMaxEntries = Number.parseInt(process.env.MAX_ENTRIES || '10', 10);
+const maxEntries = Number.isInteger(parsedMaxEntries) && parsedMaxEntries > 0 ? parsedMaxEntries : 10;
 
 const event = {
   title: process.env.EVENT_TITLE || 'Sunday Sunset Cruise',
@@ -76,23 +78,40 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/event', async (req, res, next) => {
   try {
-    const { rows } = await pool.query('SELECT id, title, description, image_src FROM car_showcase_items ORDER BY created_at ASC');
-    res.json({ ...event, showcaseItems: rows });
+    const [showcaseResult, attendanceResult] = await Promise.all([
+      pool.query('SELECT id, title, description, image_src FROM car_showcase_items ORDER BY created_at ASC'),
+      pool.query('SELECT COUNT(*)::int AS count FROM rsvps WHERE attending = true')
+    ]);
+    const attendingCount = attendanceResult.rows[0].count;
+    res.json({ ...event, showcaseItems: showcaseResult.rows, maxEntries, attendingCount, isFull: attendingCount >= maxEntries });
   } catch (error) { next(error); }
 });
 
 app.post('/api/rsvps', async (req, res, next) => {
+  let client;
   try {
     const { attending, fullName, carMakeModel } = req.body;
     if (typeof attending !== 'boolean' || !String(fullName || '').trim() || !String(carMakeModel || '').trim()) {
       return res.status(400).json({ error: 'Please complete all RSVP fields.' });
     }
-    await pool.query(
+    client = await pool.connect();
+    await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock(918274)');
+    const countResult = await client.query('SELECT COUNT(*)::int AS count FROM rsvps WHERE attending = true');
+    if (attending && countResult.rows[0].count >= maxEntries) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'No more spots are available for this cruise.' });
+    }
+    await client.query(
       'INSERT INTO rsvps (event_title, attending, full_name, car_make_model) VALUES ($1, $2, $3, $4)',
       [event.title, attending, fullName.trim().slice(0, 160), carMakeModel.trim().slice(0, 160)]
     );
+    await client.query('COMMIT');
     res.status(201).json({ message: attending ? 'You are on the list. See you there!' : 'Thanks for letting us know.' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    if (client) await client.query('ROLLBACK').catch(() => {});
+    next(error);
+  } finally { client?.release(); }
 });
 
 app.get('/admin', requireAdmin, (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
