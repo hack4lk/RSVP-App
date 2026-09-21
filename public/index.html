@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cruise RSVP</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <section class="hero" id="eventHero">
+        <div class="hero-content">
+          <p class="eyebrow">Car cruise · all welcome</p>
+          <h1 id="eventTitle">Loading event…</h1>
+          <p class="event-date" id="eventDate"></p>
+          <p class="hero-copy" id="eventDescription"></p>
+          <button class="button primary" id="openRsvp">RSVP for the cruise <span>→</span></button>
+        </div>
+      </section>
+      <section class="location-section">
+        <div><p class="eyebrow">Meet us here</p><h2 id="locationName"></h2><p id="mapDescription"></p><a id="mapsLink" class="text-link" target="_blank" rel="noopener">Open in Google Maps ↗</a></div>
+        <a id="locationImageLink" target="_blank" rel="noopener" aria-label="Open location in Google Maps"><img id="locationImage" alt="Event location" /><span class="map-pin">⌖</span></a>
+      </section>
+      <section class="route-section">
+        <p class="eyebrow">Cruise route</p>
+        <h2>From the meet-up to the finish line.</h2>
+        <div class="route-stops">
+          <article><span class="stop-number">01</span><p class="route-label">Starting address</p><h3 id="startName"></h3><p id="startAddress"></p><a id="startMapsLink" class="text-link" target="_blank" rel="noopener">Get directions ↗</a></article>
+          <div class="route-line" aria-hidden="true">→</div>
+          <article><span class="stop-number">02</span><p class="route-label">Destination address</p><h3 id="destinationName"></h3><p id="destinationAddress"></p><a id="destinationMapsLink" class="text-link" target="_blank" rel="noopener">Get directions ↗</a></article>
+        </div>
+      </section>
+      <section class="cars-section" id="carsSection" hidden>
+        <p class="eyebrow">Everyone has a place</p>
+        <h2>Built for every kind of car person.</h2>
+        <div class="car-grid" id="carGrid"></div>
+      </section>
+      <section class="final-rsvp">
+        <p class="eyebrow">Ready to cruise?</p>
+        <h2>Save your spot on the route.</h2>
+        <p>Let us know if you’re joining us and what you’ll be driving.</p>
+        <button class="button primary" id="openRsvpFinal">RSVP for the cruise <span>→</span></button>
+      </section>
+    </main>
+    <footer>Built for the road. Bring a full tank and a good story.</footer>
+
+    <dialog id="rsvpDialog">
+      <button class="close" id="closeRsvp" aria-label="Close RSVP form">×</button>
+      <p class="eyebrow">Save your spot</p><h2 id="modalTitle"></h2>
+      <p id="modalDescription" class="modal-description"></p>
+      <form id="rsvpForm">
+        <label>Attending<select name="attending" required><option value="">Choose one</option><option value="yes">Yes, I’ll be there</option><option value="no">No, not this time</option></select></label>
+        <label>Full name<input name="fullName" maxlength="160" autocomplete="name" required /></label>
+        <label>Make and model of your car<input name="carMakeModel" maxlength="160" placeholder="e.g. 1969 Chevrolet Camaro" required /></label>
+        <button class="button primary" type="submit">Send RSVP</button>
+        <p class="form-message" id="formMessage" role="status"></p>
+      </form>
+    </dialog>
+    <script src="/app.js"></script>
+  </body>
+</html>
