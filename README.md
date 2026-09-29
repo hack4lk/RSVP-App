@@ -14,6 +14,45 @@ Set `MAX_ENTRIES` to the maximum number of guests who select “Yes” on the RS
 
 From `/admin`, add car-logo rows for the public page. Each row has an image (upload a PNG, JPG, GIF, or WebP under 3.5 MB, or provide an image URL), title, and description. The rows are stored in PostgreSQL and render in the public car-community list.
 
+## Automatic Showcase Creation with LangChain
+
+This app uses **LangChain and OpenAI** to automatically create car showcase items when users RSVP with "Yes". Here's how it works:
+
+1. **User submits RSVP** with their car (e.g., "2020 Ford Mustang")
+2. **LangChain extracts** the vehicle make (e.g., "Ford") using OpenAI's GPT-3.5-turbo
+3. **Logo matching** finds the matching logo from `logos.json`
+4. **Showcase item created** automatically and added to the public car gallery
+5. **RSVP response is immediate** — LangChain processing happens in the background
+
+### Setup LangChain
+
+1. Install dependencies: `npm install` (includes `langchain` and `@langchain/openai`)
+2. Get an OpenAI API key from https://platform.openai.com/account/api-keys
+3. Add to `.env`:
+   ```env
+   OPENAI_API_KEY=sk-proj-your-actual-key-here
+   ```
+4. Customize the car logos in `logos.json`:
+   ```json
+   [
+     { "name": "Ford", "url": "https://..." },
+     { "name": "Chevy", "url": "https://..." },
+     { "name": "Nissan", "url": "https://..." }
+   ]
+   ```
+
+On Railway, add `OPENAI_API_KEY` to your app service Variables tab.
+
+**Note:** LangChain processes RSVPs asynchronously. If it fails (e.g., invalid API key), the RSVP still succeeds and the error is logged to the server console.
+
+### Admin Features
+
+From `/admin`, you can now:
+- **View all RSVPs** with attending status, car make/model, and submission date
+- **Delete RSVPs** — click "Remove" on any RSVP row (with confirmation)
+- **Manage showcase items** — add/remove car logos manually or let LangChain auto-create them
+
+
 ## Run locally
 
 1. Install dependencies: `npm install`
@@ -52,9 +91,11 @@ Create **two services in one Railway project**:
 1. Push this folder to GitHub.
 2. In Railway, create a project and choose **Deploy from GitHub repo**; select this repository.
 3. Add a **PostgreSQL** database from the project canvas (**+ New → Database → PostgreSQL**).
-4. In the app service’s Variables tab, add `DATABASE_URL` with the reference value `${{Postgres.DATABASE_URL}}`. If your database has a different service name, use that name instead.
-5. Add `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and optionally the event variables from `.env.example`.
-6. In the app service, generate a public domain from **Settings → Networking → Public Networking**. Railway will redeploy on future pushes to the connected branch.
+4. In the app service's Variables tab, add:
+   - `DATABASE_URL` with the reference value `${{Postgres.DATABASE_URL}}`
+   - `OPENAI_API_KEY` with your OpenAI API key (get one at https://platform.openai.com/account/api-keys)
+   - `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and optionally the event variables from `.env.example`
+5. In the app service, generate a public domain from **Settings → Networking → Public Networking**. Railway will redeploy on future pushes to the connected branch.
 
 ### CLI deployment
 
@@ -66,7 +107,7 @@ railway init
 railway add --database postgres
 railway add --service cruise-rsvp
 railway service   # choose the cruise-rsvp app service if prompted
-railway variable set DATABASE_URL='${{Postgres.DATABASE_URL}}' ADMIN_USERNAME=admin ADMIN_PASSWORD='use-a-long-unique-password'
+railway variable set DATABASE_URL='${{Postgres.DATABASE_URL}}' ADMIN_USERNAME=admin ADMIN_PASSWORD='use-a-long-unique-password' OPENAI_API_KEY='sk-proj-your-actual-key-here'
 railway up
 railway domain
 ```

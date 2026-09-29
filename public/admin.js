@@ -4,7 +4,7 @@ async function loadRsvps() {
   const rsvps = await response.json();
   const yes = rsvps.filter((r) => r.attending).length;
   document.querySelector('#summary').textContent = `${yes} attending · ${rsvps.length} total responses`;
-  document.querySelector('#rsvpRows').innerHTML = rsvps.map((r) => `<tr><td>${escapeHtml(r.full_name)}</td><td><span class="badge ${r.attending ? 'yes' : 'no'}">${r.attending ? 'Yes' : 'No'}</span></td><td>${escapeHtml(r.car_make_model)}</td><td>${new Date(r.created_at).toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="4">No RSVPs yet.</td></tr>';
+  document.querySelector('#rsvpRows').innerHTML = rsvps.map((r) => `<tr><td>${escapeHtml(r.full_name)}</td><td><span class="badge ${r.attending ? 'yes' : 'no'}">${r.attending ? 'Yes' : 'No'}</span></td><td>${escapeHtml(r.car_make_model)}</td><td>${new Date(r.created_at).toLocaleString()}</td><td><button class="remove-button" data-id="${r.id}" data-type="rsvp" title="Delete this RSVP">Remove</button></td></tr>`).join('') || '<tr><td colspan="5">No RSVPs yet.</td></tr>';
 }
 function escapeHtml(value) { const div = document.createElement('div'); div.textContent = value; return div.innerHTML; }
 loadRsvps();
@@ -42,3 +42,11 @@ showcaseForm.addEventListener('submit', async (event) => {
 });
 showcaseItems.addEventListener('click', async (event) => { if (!event.target.matches('.remove-button')) return; await fetch(`/api/admin/showcase-items/${event.target.dataset.id}`, { method: 'DELETE' }); loadShowcaseItems(); });
 loadShowcaseItems();
+
+// Handle RSVP row deletions
+document.querySelector('#rsvpRows').addEventListener('click', async (event) => {
+  if (!event.target.matches('.remove-button[data-type="rsvp"]')) return;
+  if (!confirm('Are you sure you want to delete this RSVP?')) return;
+  await fetch(`/api/admin/rsvps/${event.target.dataset.id}`, { method: 'DELETE' });
+  loadRsvps();
+});

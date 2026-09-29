@@ -1,1 +1,74 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>RSVP Admin</title><link rel="stylesheet" href="/styles.css"></head><body class="admin"><main><p class="eyebrow">Organizer dashboard</p><h1>RSVPs</h1><section class="content-editor"><p class="eyebrow">Car logo list</p><h2>Add a logo and description</h2><p>Every saved row appears as a card in the public car-community list. You may upload an image or use an image URL.</p><form id="showcaseForm"><label>Logo / image file<input name="imageFile" type="file" accept="image/png,image/jpeg,image/gif,image/webp"></label><label>Or image URL<input name="imageUrl" type="url" placeholder="https://example.com/logo.png"></label><div class="logo-preview" id="logoPreview" hidden><img id="logoPreviewImage" alt="Logo thumbnail preview"><span>Thumbnail preview</span></div><label>Title<input name="title" maxlength="100" placeholder="e.g. Chevrolet" required></label><label>Description<input name="description" maxlength="1000" placeholder="A short description shown beneath the logo." required></label><button class="button primary" type="submit">Add logo to list</button><p id="showcaseMessage" class="form-message" role="status"></p></form><div id="showcaseItems" class="admin-showcase-items"></div></section><p id="summary">Loading guest list…</p><div class="table-wrap"><table><thead><tr><th>Name</th><th>Attending</th><th>Car</th><th>Submitted</th></tr></thead><tbody id="rsvpRows"></tbody></table></div></main><script src="/admin.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>RSVP Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin">
+    <main>
+      <p class="eyebrow">Organizer dashboard</p>
+      <h1>RSVPs</h1>
+      <section class="content-editor">
+        <p class="eyebrow">Car logo list</p>
+        <h2>Add a logo and description</h2>
+        <p>
+          Every saved row appears as a card in the public car-community list.
+          You may upload an image or use an image URL.
+        </p>
+        <form id="showcaseForm">
+          <label
+            >Logo / image file<input
+              name="imageFile"
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp" /></label
+          ><label
+            >Or image URL<input
+              name="imageUrl"
+              type="url"
+              placeholder="https://example.com/logo.png"
+          /></label>
+          <div class="logo-preview" id="logoPreview" hidden>
+            <img id="logoPreviewImage" alt="Logo thumbnail preview" /><span
+              >Thumbnail preview</span
+            >
+          </div>
+          <label
+            >Title<input
+              name="title"
+              maxlength="100"
+              placeholder="e.g. Chevrolet"
+              required /></label
+          ><label
+            >Description<input
+              name="description"
+              maxlength="1000"
+              placeholder="A short description shown beneath the logo."
+              required /></label
+          ><button class="button primary" type="submit">
+            Add logo to list
+          </button>
+          <p id="showcaseMessage" class="form-message" role="status"></p>
+        </form>
+        <div id="showcaseItems" class="admin-showcase-items"></div>
+      </section>
+      <p id="summary">Loading guest list…</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Attending</th>
+              <th>Car</th>
+              <th>Submitted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rsvpRows"></tbody>
+        </table>
+      </div>
+    </main>
+    <script src="/admin.js"></script>
+  </body>
+</html>
