@@ -4,6 +4,9 @@ const path = require("path");
 const { Pool } = require("pg");
 const fs = require("fs");
 const { generateShowcasePayload } = require("./langchain-showcase");
+const {
+  generateShowcasePayloadWithAgent,
+} = require("./langchain-agentic-showcase");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,6 +19,18 @@ const maxEntries =
   Number.isInteger(parsedMaxEntries) && parsedMaxEntries > 0
     ? parsedMaxEntries
     : 10;
+
+// check if we're using the agentic approach or the standard approach for generating showcase items
+const useAgentShowcase = process.env.USE_AGENTIC_SHOWCASE === "true";
+const langsmithTracingEnabled =
+  process.env.LANGSMITH_TRACING === "true" &&
+  Boolean(process.env.LANGSMITH_API_KEY);
+
+if (useAgentShowcase && !langsmithTracingEnabled) {
+  console.warn(
+    "LangSmith tracing is disabled. Set LANGSMITH_TRACING=true and LANGSMITH_API_KEY to record agent runs.",
+  );
+}
 
 // load the logos
 const logos = JSON.parse(
@@ -89,15 +104,36 @@ async function initializeDatabase() {
 
 async function createShowcaseItemFromRSVP(carMakeModel) {
   try {
-    const showcaseData = await generateShowcasePayload(carMakeModel, logos);
+    let showcaseData;
 
-    if (!showcaseData) {
-      console.error(
-        "Failed to generate showcase data for car make/model:",
+    if (useAgentShowcase) {
+      const created = await generateShowcasePayloadWithAgent(
         carMakeModel,
-        showcaseData,
+        logos,
+        pool,
       );
-      return null;
+
+      if (!created) {
+        console.error(
+          "Agent did not create a showcase item for car make/model:",
+          carMakeModel,
+        );
+        return null;
+      }
+
+      console.log("Created showcase item with agent for:", carMakeModel);
+      return;
+    } else {
+      showcaseData = await generateShowcasePayload(carMakeModel, logos);
+
+      if (!showcaseData) {
+        console.error(
+          "Failed to generate showcase data for car make/model:",
+          carMakeModel,
+          showcaseData,
+        );
+        return null;
+      }
     }
 
     await pool.query(
@@ -275,18 +311,14 @@ app.post("/api/admin/showcase-items", requireAdmin, async (req, res, next) => {
   }
 });
 
-app.delete(
-  "/api/admin/rsvps/:id",
-  requireAdmin,
-  async (req, res, next) => {
-    try {
-      await pool.query("DELETE FROM rsvps WHERE id = $1", [req.params.id]);
-      res.status(204).end();
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+app.delete("/api/admin/rsvps/:id", requireAdmin, async (req, res, next) => {
+  try {
+    await pool.query("DELETE FROM rsvps WHERE id = $1", [req.params.id]);
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.delete(
   "/api/admin/showcase-items/:id",

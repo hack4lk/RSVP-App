@@ -10,13 +10,26 @@ Set `START_NAME`, `START_ADDRESS`, `START_MAPS_URL`, `DESTINATION_NAME`, `DESTIN
 
 Set `MAX_ENTRIES` to the maximum number of guests who select “Yes” on the RSVP form. It defaults to `10`; when reached, the public RSVP buttons close and the server rejects any further attending RSVPs.
 
+## LangSmith tracing
+
+To record the automatic showcase agent's tool calls, set these variables on the Railway app service (or local `.env`):
+
+```env
+USE_AGENTIC_SHOWCASE=true
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your-langsmith-api-key
+LANGSMITH_PROJECT=car-cruise-rsvp
+```
+
+`LANGSMITH_PROJECT` must exactly match the tracing project selected in the LangSmith UI. Traces are created only when an attending RSVP triggers the showcase agent; ordinary page loads do not invoke the agent.
+
 `ADMIN_USERNAME` and `ADMIN_PASSWORD` protect `/admin` using browser basic authentication. Set a long, unique production password.
 
 From `/admin`, add car-logo rows for the public page. Each row has an image (upload a PNG, JPG, GIF, or WebP under 3.5 MB, or provide an image URL), title, and description. The rows are stored in PostgreSQL and render in the public car-community list.
 
 ## Automatic Showcase Creation with LangChain
 
-This app uses **LangChain and OpenAI** to automatically create car showcase items when users RSVP with "Yes". Here's how it works:
+This app uses **LangChain and OpenAI** to automatically create car showcase items when users RSVP with "Yes". The workflow has bounded steps, so a failed logo lookup cannot loop indefinitely. Here's how it works:
 
 1. **User submits RSVP** with their car (e.g., "2020 Ford Mustang")
 2. **LangChain extracts** the vehicle make (e.g., "Ford") using OpenAI's GPT-3.5-turbo

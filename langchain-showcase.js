@@ -42,8 +42,16 @@ function selectLogoFromMake(make, logos) {
   }
 
   const lowerMake = make.toLowerCase().trim();
+  const aliases = {
+    mercedes: "mercedes-benz",
+    mercedesbenz: "mercedes-benz",
+    "mercedes benz": "mercedes-benz",
+    chevy: "chevrolet",
+    vw: "volkswagen",
+  };
+  const normalizedMake = aliases[lowerMake] || lowerMake;
   const match = logos.find(
-    (logo) => logo.name.toLowerCase().trim() === lowerMake,
+    (logo) => logo.name.toLowerCase().trim() === normalizedMake,
   );
 
   return match || null;
